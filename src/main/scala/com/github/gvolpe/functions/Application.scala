@@ -58,8 +58,23 @@ object Application extends App with EmailService {
 
   val liftedBarHandler: (String) => Option[String] = barHandler.lift
 
+  val unliftedBarHandler: PartialFunction[String, String] = Function.unlift(liftedBarHandler)
+
   val value = "bartender"
   val handler: Option[String] = fooHandler(value) orElse liftedBarHandler(value) orElse catHandler.lift(value)
   println(handler.getOrElse("No handler found!"))
+
+  // Currying
+
+  val sum: (Int, Int) => Int = _ + _
+  val sumCurried: Int => Int => Int = sum.curried
+
+  val sumUncurried: (Int, Int) => Int = Function.uncurried(sumCurried)
+
+  println("SUM >> " + sum(1, 2))
+  println("CURRIED SUM >> " + sumCurried(2)(3))
+
+  val newEmails: Seq[Email] = MockMailBoxService.newEmails(User("Gabriel"))
+  println(newEmails)
 
 }
