@@ -7,11 +7,12 @@ object MockEmailRepository extends EmailRepository {
 }
 
 object MockFilterRepository extends FilterRepository {
-  override def getEmailFilter(user: User): EmailFilter = _ => true
+  def getEmailFilter(user: User): EmailFilter = _ => true
 }
 
 object MockMailBoxService extends MailBoxService {
   val newEmails: (User) => Seq[Email] = getNewEmails(MockEmailRepository)(MockFilterRepository)
+  val newEmails2: (User) => Seq[Email] = getNewEmails2(MockEmailRepository)(MockFilterRepository)
 }
 
 case class User(name: String)
@@ -27,6 +28,11 @@ trait FilterRepository extends EmailCustomTypes {
 trait MailBoxService {
   def getNewEmails(emailRepo: EmailRepository)(filterRepo: FilterRepository)(user: User) =
     emailRepo.getEmails(user, true) filter (filterRepo.getEmailFilter(user))
+
+  // Default Haskell way for Currying functions
+  def getNewEmails2: EmailRepository => FilterRepository => User => Seq[Email] = { emailRepo => filterRepo => user =>
+    emailRepo.getEmails(user, true) filter (filterRepo.getEmailFilter(user))
+  }
 
   val newEmails: User => Seq[Email]
 }
